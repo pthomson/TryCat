@@ -6,15 +6,17 @@
 
 <div x-data="game"
      @@keyup.window="onKeyPress($event.key)">
-    <template x-for="row in board">
-        <div class="row">
-            <template x-for="tile in row">
-                <div class="tile" x-text="tile.letter"></div>
-            </template>
-        </div>
-    </template>
+    <div>
+        <template x-for="row in board">
+            <div class="row">
+                <template x-for="tile in row">
+                    <div class="tile" x-text="tile.letter"></div>
+                </template>
+            </div>
+        </template>
+    </div>
+    <output x-text="message"></output>
 </div>
-
 <script>
     class Tile{
         letter ='';
@@ -25,12 +27,14 @@
             return {
                 board:{},
                 theWord: 'dog',
-                
+
                 wordLength: 3,// TODO calc based on theWord
 
                 guessesAllowed: 3,
                 currentRowIndex: 0,
-                
+                gameState: 'active', //  active, complete
+                message: '', // game progress feedback message to user
+
                 get currentGuess(){
                     return this.currentRow.map(tile=>tile.letter).join('');//just like split().join() to concat array into a string...
                 },
@@ -43,40 +47,38 @@
                 fillTile(key){
                     for(let tile of this.currentRow){
                         if(tile.letter==''){
-                            tile.letter=key;break;
+                            tile.letter=key;
+                            break;
                         }
                     }
 
 
-                    //this.currentRow().forEach(tile =>{
-                    //    tile.letter=key;
-                    //});
-                       // this.board[this.currentRowIndex][this.currentTileIndex]=key;
-
-                        if(this.currentTileIndex==this.wordLength-1){
-                            this.currentRowIndex++;
-                     
-                        } else {
-                            this.currentTileIndex++;
-                        };
                     },
                 onKeyPress(key){
+                    this.message=''; //clear any previous message we had displayed
                     if(/^[A-z]$/.test(key)){
                         this.fillTile(key);
-                    } else if (key=='Enter'){alert(this.currentGuess);
-                        this.submitGuess();
                     }
-                    ;
+                    else if (key=='Enter'){
+                        this.submitGuess();
+                    };
                 },
                 get currentRow(){
                     return this.board[this.currentRowIndex];// this one is BS IMO... unless it is a getter ?
                 },
                 submitGuess(){
                     if(this.currentGuess<this.wordLength){
-                        return; //reject early 
+                        return; //reject early
                     }
                     if(this.currentGuess==this.theWord){
-                        alert('you fool! you win');
+                        this.message='winner!';
+                    } else if(this.guessesAllowed==this.currentRowIndex+1){
+                         this.message='game over man.';
+                        this.gameState='complete';
+
+                    } else{
+                        this.message+=" try again please";
+                        this.currentRowIndex++;// entered a word that didn't match so lost another row.
                     }
                 }
             }
