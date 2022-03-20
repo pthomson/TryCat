@@ -10,7 +10,7 @@
         <template x-for="row in board">
             <div class="row">
                 <template x-for="tile in row">
-                    <div class="tile" x-text="tile.letter"></div>
+                    <div class="tile" :class="tile.status" x-text="tile.letter"></div>
                 </template>
             </div>
         </template>
@@ -26,9 +26,8 @@
         Alpine.data('game', () => {
             return {
                 board:{},
-                theWord: 'dog',
 
-                wordLength: 3,// TODO calc based on theWord
+                theWord: 'dog',
 
                 guessesAllowed: 3,
                 currentRowIndex: 0,
@@ -41,7 +40,7 @@
 
                 init(){
                     this.board= Array.from({length: this.guessesAllowed }, () =>{
-                        return  Array.from({length: this.wordLength }, () => new Tile);
+                        return  Array.from({length: this.theWord.length }, () => new Tile);
                     });
                 },
                 fillTile(key){
@@ -67,9 +66,10 @@
                     return this.board[this.currentRowIndex];// this one is BS IMO... unless it is a getter ?
                 },
                 submitGuess(){
-                    if(this.currentGuess<this.wordLength){
+                    if(this.currentGuess.length<this.theWord.length){
                         return; //reject early
                     }
+                   this.refreshStatusForCurrentRow();
                     if(this.currentGuess==this.theWord){
                         this.message='winner!';
                     } else if(this.guessesAllowed==this.currentRowIndex+1){
@@ -80,6 +80,15 @@
                         this.message+=" try again please";
                         this.currentRowIndex++;// entered a word that didn't match so lost another row.
                     }
+                },
+                refreshStatusForCurrentRow(){
+                      //update the tile colors based on correctness.
+                    this.currentRow.forEach((tile, index) => {
+                        tile.status=this.theWord.includes(tile.letter)?'present':'absent';
+                        if(this.currentGuess[index]==this.theWord[index]){
+                            tile.status='correct';
+                        }
+                    });
                 }
             }
         }
