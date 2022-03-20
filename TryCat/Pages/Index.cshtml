@@ -1,0 +1,51 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div 
+    x-data="game"
+    @@keyup.window="onKeyPress($event.key)"
+
+>
+   <template x-for="row in board">
+       <div class="row">
+             <template x-for="tile in row">
+                 <div class="tile" x-text="tile"></div>
+                 </template>
+       </div>
+   </template>
+</div>
+ 
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('game', () => {
+            return {
+                board:{},
+                guessesAllowed: 3,
+                wordLength: 3,
+                currentRowIndex: 0,
+                currentTileIndex:0,
+                init(){
+                    this.board= Array.from({length: this.guessesAllowed }, () =>{
+                        return  Array.from({length: this.wordLength }, () => ''
+                        );
+                    }
+                    );
+                },
+                onKeyPress(key){
+                    //validation
+                    this.board[this.currentRowIndex][this.currentTileIndex]=key;
+                    if(this.currentTileIndex==this.wordLength-1){
+                        this.currentRowIndex++;
+                        this.currentTileIndex=0;
+                    } else {
+                        this.currentTileIndex++;
+                    }
+                }
+        }
+        }
+        );
+    });
+</script>
